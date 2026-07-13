@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Casa Costa — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,400;0,500;0,600;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<style>
+  :root{
+    --navy:#0B3F52;
+    --navy-deep:#082B38;
+    --turquoise:#0FA0C4;
+    --sand:#F6F0E3;
+    --coral:#E2541F;
+    --green:#16A34A;
+    --red:#DC2626;
+    --amber:#D97706;
+    --font-display:'Cormorant',serif;
+    --font-sans:'Jost',sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;font-family:var(--font-sans);background:var(--navy-deep);color:var(--sand);-webkit-font-smoothing:antialiased;}
+
+  /* ---- SETUP BANNER ---- */
+  .setup-banner{
+    background:#7C3AED;
+    color:#fff;
+    padding:0.85rem 1.5rem;
+    display:flex;
+    align-items:center;
+    gap:1rem;
+    font-size:0.82rem;
+    line-height:1.5;
+  }
+  .setup-banner strong{display:block;margin-bottom:0.2rem;}
+  .setup-banner ol{margin-left:1.2rem;margin-top:0.3rem;}
+  .setup-banner.hidden{display:none;}
+
+  /* ---- PASSWORD GATE ---- */
+  .gate{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:2rem;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(15,160,196,0.12) 0%, transparent 65%),
+      var(--navy-deep);
+  }
+  .gate-card{
+    background:rgba(246,240,227,0.06);
+    border:1px solid rgba(246,240,227,0.14);
+    border-radius:8px;
+    padding:3rem 2.6rem;
+    width:100%;
+    max-width:380px;
+    text-align:center;
+  }
+  .gate-logo{width:48px;margin:0 auto 1.6rem;}
+  .gate-title{
+    font-family:var(--font-display);
+    font-size:1.6rem;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    margin-bottom:0.3rem;
+  }
+  .gate-sub{font-size:0.75rem;letter-spacing:0.14em;text-transform:uppercase;color:rgba(246,240,227,0.5);margin-bottom:2rem;}
+  .gate-input{
+    width:100%;
+    background:rgba(246,240,227,0.08);
+    border:1px solid rgba(246,240,227,0.2);
+    border-radius:4px;
+    padding:0.9em 1em;
+    font-family:var(--font-sans);
+    font-size:1rem;
+    color:var(--sand);
+    margin-bottom:1rem;
+    text-align:center;
+    letter-spacing:0.1em;
+  }
+  .gate-input:focus{outline:2px solid var(--turquoise);outline-offset:1px;}
+  .gate-input::placeholder{color:rgba(246,240,227,0.35);letter-spacing:0.04em;}
+  .gate-btn{
+    width:100%;
+    background:var(--coral);
+    color:#fff;
+    border:none;
+    border-radius:4px;
+    padding:0.9em;
+    font-family:var(--font-sans);
+    font-weight:500;
+    font-size:0.8rem;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    cursor:pointer;
+    transition:background 0.2s;
+  }
+  .gate-btn:hover{background:#c8451a;}
+  .gate-error{
+    margin-top:0.9rem;
+    font-size:0.82rem;
+    color:#FCA5A5;
+    display:none;
+  }
+  .gate-error.visible{display:block;}
+
+  /* ---- DASHBOARD ---- */
+  .dashboard{display:none;min-height:100vh;}
+  .dashboard.visible{display:block;}
+
+  .dash-header{
+    background:rgba(246,240,227,0.04);
+    border-bottom:1px solid rgba(246,240,227,0.1);
+    padding:1rem 2rem;
+    display:flex;
+    align-items:center;
+    gap:1.2rem;
+    position:sticky;
+    top:0;
+    z-index:10;
+    backdrop-filter:blur(6px);
+  }
+  .dash-logo{height:32px;}
+  .dash-title{flex:1;}
+  .dash-title h1{
+    font-family:var(--font-display);
+    font-size:1.15rem;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    line-height:1;
+  }
+  .dash-title p{font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;color:rgba(246,240,227,0.45);margin-top:0.2rem;}
+  .logout-btn{
+    background:transparent;
+    border:1px solid rgba(246,240,227,0.3);
+    color:rgba(246,240,227,0.7);
+    padding:0.5em 1.1em;
+    border-radius:4px;
+    font-family:var(--font-sans);
+    font-size:0.72rem;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    cursor:pointer;
+    transition:all 0.2s;
+  }
+  .logout-btn:hover{border-color:rgba(246,240,227,0.6);color:var(--sand);}
+
+  .dash-body{padding:2rem;}
+
+  /* ---- STATS ---- */
+  .stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:1rem;
+    margin-bottom:2rem;
+  }
+  @media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr);}}
+  .stat-card{
+    background:rgba(246,240,227,0.06);
+    border:1px solid rgba(246,240,227,0.1);
+    border-radius:6px;
+    padding:1.4rem 1.2rem;
+    text-align:center;
+  }
+  .stat-num{
+    font-family:var(--font-display);
+    font-size:2.6rem;
+    font-weight:600;
+    line-height:1;
+    display:block;
+    margin-bottom:0.4rem;
+  }
+  .stat-label{font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(246,240,227,0.5);}
+  .stat-card.s-confirmed .stat-num{color:#4ADE80;}
+  .stat-card.s-pending .stat-num{color:#FCD34D;}
+  .stat-card.s-rejected .stat-num{color:#FCA5A5;}
+
+  /* ---- FILTERS ---- */
+  .filter-row{
+    display:flex;
+    gap:0.5rem;
+    margin-bottom:1.2rem;
+    flex-wrap:wrap;
+  }
+  .filter-btn{
+    background:transparent;
+    border:1px solid rgba(246,240,227,0.2);
+    color:rgba(246,240,227,0.6);
+    padding:0.5em 1.2em;
+    border-radius:100px;
+    font-family:var(--font-sans);
+    font-size:0.75rem;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    cursor:pointer;
+    transition:all 0.2s;
+  }
+  .filter-btn:hover{border-color:rgba(246,240,227,0.5);color:var(--sand);}
+  .filter-btn.active{background:var(--turquoise);border-color:var(--turquoise);color:#fff;}
+
+  /* ---- TABLE ---- */
+  .table-wrap{
+    background:rgba(246,240,227,0.04);
+    border:1px solid rgba(246,240,227,0.1);
+    border-radius:6px;
+    overflow-x:auto;
+  }
+  table{width:100%;border-collapse:collapse;font-size:0.88rem;}
+  thead th{
+    padding:0.9rem 1rem;
+    text-align:left;
+    font-size:0.68rem;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:rgba(246,240,227,0.45);
+    border-bottom:1px solid rgba(246,240,227,0.1);
+    white-space:nowrap;
+  }
+  tbody tr{border-bottom:1px solid rgba(246,240,227,0.07);transition:background 0.15s;}
+  tbody tr:last-child{border-bottom:none;}
+  tbody tr:hover{background:rgba(246,240,227,0.04);}
+  td{padding:0.9rem 1rem;vertical-align:middle;}
+  td a{color:var(--turquoise);text-decoration:none;}
+  td a:hover{text-decoration:underline;}
+  .td-num{color:rgba(246,240,227,0.35);font-size:0.78rem;}
+  .td-date{color:rgba(246,240,227,0.5);font-size:0.8rem;white-space:nowrap;}
+  .td-empty{text-align:center;padding:3rem;color:rgba(246,240,227,0.35);font-style:italic;}
+
+  /* ---- BADGES ---- */
+  .badge{
+    display:inline-block;
+    padding:0.3em 0.8em;
+    border-radius:100px;
+    font-size:0.68rem;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    font-weight:500;
+    white-space:nowrap;
+  }
+  .badge-pending{background:rgba(217,119,6,0.2);color:#FCD34D;border:1px solid rgba(217,119,6,0.4);}
+  .badge-confirmed{background:rgba(22,163,74,0.2);color:#4ADE80;border:1px solid rgba(22,163,74,0.4);}
+  .badge-rejected{background:rgba(220,38,38,0.2);color:#FCA5A5;border:1px solid rgba(220,38,38,0.4);}
+
+  /* ---- ACTION BUTTONS ---- */
+  .actions{display:flex;gap:0.4rem;flex-wrap:wrap;align-items:center;}
+  .act-btn{
+    border:none;
+    border-radius:4px;
+    padding:0.4em 0.8em;
+    font-family:var(--font-sans);
+    font-size:0.7rem;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    cursor:pointer;
+    transition:opacity 0.2s,transform 0.15s;
+    white-space:nowrap;
+  }
+  .act-btn:hover{opacity:0.85;transform:translateY(-1px);}
+  .act-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+  .act-confirm{background:rgba(22,163,74,0.25);color:#4ADE80;border:1px solid rgba(22,163,74,0.4);}
+  .act-reject{background:rgba(220,38,38,0.15);color:#FCA5A5;border:1px solid rgba(220,38,38,0.3);}
+  .act-email{background:var(--coral);color:#fff;}
+  .act-email:disabled{background:rgba(226,84,31,0.3);}
+  .email-sent-label{font-size:0.7rem;color:#4ADE80;white-space:nowrap;}
+
+  /* ---- TOAST ---- */
+  .toast{
+    position:fixed;
+    bottom:2rem;
+    right:2rem;
+    background:var(--navy);
+    border:1px solid rgba(246,240,227,0.2);
+    color:var(--sand);
+    padding:1rem 1.4rem;
+    border-radius:6px;
+    font-size:0.88rem;
+    box-shadow:0 20px 40px rgba(0,0,0,0.4);
+    transform:translateY(20px);
+    opacity:0;
+    pointer-events:none;
+    transition:all 0.3s ease;
+    max-width:320px;
+    z-index:100;
+  }
+  .toast.show{transform:translateY(0);opacity:1;}
+  .toast.toast-success{border-color:rgba(74,222,128,0.5);}
+  .toast.toast-error{border-color:rgba(252,165,165,0.5);}
+
+  .hidden{display:none!important;}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════
+     SETUP BANNER — remove once configured
+     ══════════════════════════════ -->
+<div class="setup-banner" id="setupBanner">
+  <div>
+    <strong>⚙️ One-time setup required — follow these steps to activate the dashboard:</strong>
+    <ol>
+      <li>Go to <strong>firebase.google.com</strong> → Create project → name it "casa-costa" → Disable Analytics → Create</li>
+      <li>Inside the project → Click web icon (&lt;/&gt;) → Register app → Copy the <em>firebaseConfig</em> object → Paste it in <strong>admin.html</strong> AND <strong>index.html</strong> replacing the placeholder text</li>
+      <li>In Firebase left menu → Firestore Database → Create database → Start in <em>test mode</em> → Done</li>
+      <li>Go to <strong>emailjs.com</strong> → Create account → Add Email Service → Connect Gmail (laramarlon996@gmail.com) → Note the Service ID</li>
+      <li>In EmailJS → Email Templates → Create template → Set Subject to "You're confirmed. Casa Costa 🌊" → Paste the HTML body below → Note the Template ID</li>
+      <li>In EmailJS → Account → API Keys → Copy your Public Key</li>
+      <li>Paste all three EmailJS values into admin.html where it says REPLACE_EMAILJS</li>
+      <li>Once everything is pasted, delete this banner or set <code>id="setupBanner"</code> to <code>class="hidden"</code></li>
+    </ol>
+    <p style="margin-top:8px;opacity:0.7;font-size:0.75rem;">
+      EmailJS template HTML body to paste:
+      <code style="display:block;background:rgba(0,0,0,0.3);padding:6px 10px;margin-top:4px;border-radius:4px;font-size:0.72rem;white-space:pre-wrap;">Subject: You're confirmed. Casa Costa 🌊
+To Email: {{to_email}}   To Name: {{to_name}}
+
+HTML Body:
+&lt;div style="font-family:Georgia,serif;max-width:580px;margin:0 auto;background:#F6F0E3;padding:48px 40px;"&gt;
+  &lt;h2 style="font-size:22px;letter-spacing:0.1em;color:#0B3F52;text-align:center;"&gt;CASA COSTA&lt;/h2&gt;
+  &lt;p style="font-size:11px;letter-spacing:0.15em;color:#0B3F52;text-align:center;opacity:0.6;margin-bottom:32px;"&gt;SOCIAL CLUB&lt;/p&gt;
+  &lt;p style="color:#0B3F52;font-size:17px;"&gt;Hey {{to_name}},&lt;/p&gt;
+  &lt;p style="color:#0B3F52;margin-top:16px;line-height:1.7;"&gt;You're confirmed for &lt;strong&gt;Casa Costa Launch Weekend&lt;/strong&gt;.&lt;/p&gt;
+  &lt;div style="background:#0B3F52;color:#F6F0E3;padding:24px;border-radius:4px;margin:28px 0;"&gt;
+    &lt;p style="margin-bottom:10px;"&gt;&lt;strong&gt;Friday, July 25&lt;/strong&gt; — Launch Day · In the Venue&lt;/p&gt;
+    &lt;p&gt;&lt;strong&gt;Saturday, July 26&lt;/strong&gt; — Sunset Party · Beach Area&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;p style="color:#0B3F52;line-height:1.7;"&gt;Exact location and time will be sent 48 hours before. Don't share this — it's just for you.&lt;/p&gt;
+  &lt;p style="color:#0B3F52;margin-top:28px;"&gt;See you there,&lt;br&gt;&lt;em&gt;Casa Costa Social Club&lt;/em&gt;&lt;/p&gt;
+&lt;/div&gt;</code>
+    </p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     PASSWORD GATE
+     ══════════════════════════════ -->
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <img class="gate-logo" src="assets/logo-mark-white.png" alt="Casa Costa">
+    <h1 class="gate-title">Admin</h1>
+    <p class="gate-sub">Casa Costa Social Club</p>
+    <input
+      class="gate-input"
+      type="password"
+      id="passwordInput"
+      placeholder="Enter password"
+      autocomplete="current-password"
+    >
+    <button class="gate-btn" onclick="checkPassword()">Enter Dashboard</button>
+    <p class="gate-error" id="gateError">Wrong password — try again.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     DASHBOARD
+     ══════════════════════════════ -->
+<div class="dashboard" id="dashboard">
+
+  <header class="dash-header">
+    <img class="dash-logo" src="assets/logo-mark-white.png" alt="Casa Costa">
+    <div class="dash-title">
+      <h1>Admin Dashboard</h1>
+      <p>Launch Weekend · Puerto Cortés</p>
+    </div>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </header>
+
+  <div class="dash-body">
+
+    <!-- STATS -->
+    <div class="stats">
+      <div class="stat-card">
+        <span class="stat-num" id="statTotal">—</span>
+        <span class="stat-label">Total</span>
+      </div>
+      <div class="stat-card s-confirmed">
+        <span class="stat-num" id="statConfirmed">—</span>
+        <span class="stat-label">Confirmed</span>
+      </div>
+      <div class="stat-card s-pending">
+        <span class="stat-num" id="statPending">—</span>
+        <span class="stat-label">Pending</span>
+      </div>
+      <div class="stat-card s-rejected">
+        <span class="stat-num" id="statRejected">—</span>
+        <span class="stat-label">Rejected</span>
+      </div>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="filter-row">
+      <button class="filter-btn active" id="f-all"       onclick="setFilter('all',this)">All</button>
+      <button class="filter-btn"        id="f-pending"   onclick="setFilter('pending',this)">Pending</button>
+      <button class="filter-btn"        id="f-confirmed" onclick="setFilter('confirmed',this)">Confirmed</button>
+      <button class="filter-btn"        id="f-rejected"  onclick="setFilter('rejected',this)">Rejected</button>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Instagram</th>
+            <th>Registered</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr><td class="td-empty" colspan="7">Loading registrations…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ══════════════════════════════════════
+  //  ⚙️  CONFIGURATION — REPLACE THESE
+  // ══════════════════════════════════════
+
+  // 1. Paste your Firebase config here (from Firebase console > Project Settings > Your apps)
+  const firebaseConfig = {
+    apiKey:            "REPLACE_FIREBASE_API_KEY",
+    authDomain:        "REPLACE_FIREBASE_PROJECT_ID.firebaseapp.com",
+    projectId:         "REPLACE_FIREBASE_PROJECT_ID",
+    storageBucket:     "REPLACE_FIREBASE_PROJECT_ID.appspot.com",
+    messagingSenderId: "REPLACE_FIREBASE_SENDER_ID",
+    appId:             "REPLACE_FIREBASE_APP_ID"
+  };
+
+  // 2. Paste your EmailJS keys here (from emailjs.com > Account + Email Templates)
+  const EMAILJS_PUBLIC_KEY  = "REPLACE_EMAILJS_PUBLIC_KEY";
+  const EMAILJS_SERVICE_ID  = "REPLACE_EMAILJS_SERVICE_ID";
+  const EMAILJS_TEMPLATE_ID = "REPLACE_EMAILJS_TEMPLATE_ID";
+
+  // Admin password (change if needed)
+  const ADMIN_PASSWORD = "Sanmar";
+
+  // ══════════════════════════════════════
+  //  APP LOGIC
+  // ══════════════════════════════════════
+
+  let db = null;
+  let allRegistrations = [];
+  let currentFilter = 'all';
+
+  // Detect if Firebase is configured
+  const isConfigured = !firebaseConfig.apiKey.startsWith('REPLACE');
+
+  if (isConfigured) {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+  }
+
+  // Password
+  document.getElementById('passwordInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') checkPassword();
+  });
+
+  function checkPassword() {
+    const val = document.getElementById('passwordInput').value;
+    if (val === ADMIN_PASSWORD) {
+      document.getElementById('gate').classList.add('hidden');
+      document.getElementById('dashboard').classList.add('visible');
+      if (isConfigured) {
+        loadRegistrations();
+      } else {
+        showDemoData();
+      }
+    } else {
+      const err = document.getElementById('gateError');
+      err.classList.add('visible');
+      document.getElementById('passwordInput').value = '';
+      setTimeout(() => err.classList.remove('visible'), 3000);
+    }
+  }
+
+  function logout() {
+    document.getElementById('dashboard').classList.remove('visible');
+    document.getElementById('gate').classList.remove('hidden');
+    document.getElementById('passwordInput').value = '';
+  }
+
+  // Filter
+  function setFilter(filter, btn) {
+    currentFilter = filter;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderTable();
+  }
+
+  // Load from Firestore (real-time)
+  function loadRegistrations() {
+    db.collection('registrations')
+      .orderBy('createdAt', 'desc')
+      .onSnapshot(snapshot => {
+        allRegistrations = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        updateStats();
+        renderTable();
+      }, err => {
+        showToast('Error loading data: ' + err.message, 'error');
+      });
+  }
+
+  // Demo data (shown when Firebase not yet configured)
+  function showDemoData() {
+    allRegistrations = [
+      { id: 'demo1', name: 'María García',  email: 'maria@example.com',   instagram: 'mariagarcia',  status: 'pending',   emailSent: false, createdAt: { toDate: () => new Date('2025-07-10T14:32:00') } },
+      { id: 'demo2', name: 'Carlos López',  email: 'carlos@example.com',  instagram: 'carloslopez',  status: 'confirmed', emailSent: true,  createdAt: { toDate: () => new Date('2025-07-10T11:20:00') } },
+      { id: 'demo3', name: 'Sofia Martínez',email: 'sofia@example.com',   instagram: 'sofiamartin',  status: 'pending',   emailSent: false, createdAt: { toDate: () => new Date('2025-07-09T20:05:00') } },
+      { id: 'demo4', name: 'Diego Reyes',   email: 'diego@example.com',   instagram: 'diegoreyes_',  status: 'rejected',  emailSent: false, createdAt: { toDate: () => new Date('2025-07-09T18:45:00') } },
+      { id: 'demo5', name: 'Valeria Cruz',  email: 'vale@example.com',    instagram: 'valecruz',     status: 'confirmed', emailSent: false, createdAt: { toDate: () => new Date('2025-07-09T16:12:00') } },
+    ];
+    showToast('⚠️ Demo data — connect Firebase to see real registrations', 'error');
+    updateStats();
+    renderTable();
+  }
+
+  // Stats
+  function updateStats() {
+    document.getElementById('statTotal').textContent     = allRegistrations.length;
+    document.getElementById('statConfirmed').textContent = allRegistrations.filter(r => r.status === 'confirmed').length;
+    document.getElementById('statPending').textContent   = allRegistrations.filter(r => r.status === 'pending').length;
+    document.getElementById('statRejected').textContent  = allRegistrations.filter(r => r.status === 'rejected').length;
+  }
+
+  // Render table
+  function renderTable() {
+    const list = currentFilter === 'all'
+      ? allRegistrations
+      : allRegistrations.filter(r => r.status === currentFilter);
+
+    const tbody = document.getElementById('tableBody');
+
+    if (list.length === 0) {
+      tbody.innerHTML = `<tr><td class="td-empty" colspan="7">No registrations in this category.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = list.map((reg, i) => {
+      const insta = (reg.instagram || '').replace(/^@/, '');
+      const date  = reg.createdAt?.toDate ? reg.createdAt.toDate() : new Date();
+      const dateStr = date.toLocaleDateString('en-US', { month:'short', day:'numeric' })
+                   + ' · ' + date.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+
+      const confirmBtn = reg.status !== 'confirmed'
+        ? `<button class="act-btn act-confirm" onclick="updateStatus('${reg.id}','confirmed')">✓ Confirm</button>` : '';
+
+      const rejectBtn = reg.status !== 'rejected'
+        ? `<button class="act-btn act-reject" onclick="updateStatus('${reg.id}','rejected')">✗ Reject</button>` : '';
+
+      const emailBtn = reg.status === 'confirmed' && !reg.emailSent
+        ? `<button class="act-btn act-email" id="ebtn-${reg.id}" onclick="sendEmail('${reg.id}')">✉ Send Email</button>` : '';
+
+      const emailSentLabel = reg.emailSent
+        ? `<span class="email-sent-label">✓ Email sent</span>` : '';
+
+      return `
+        <tr data-id="${reg.id}">
+          <td class="td-num">${i + 1}</td>
+          <td><strong>${escHtml(reg.name || '—')}</strong></td>
+          <td><a href="mailto:${escHtml(reg.email)}">${escHtml(reg.email || '—')}</a></td>
+          <td>${insta ? `<a href="https://instagram.com/${escHtml(insta)}" target="_blank" rel="noopener">@${escHtml(insta)}</a>` : '—'}</td>
+          <td class="td-date">${dateStr}</td>
+          <td><span class="badge badge-${reg.status}">${reg.status}</span></td>
+          <td><div class="actions">${confirmBtn}${rejectBtn}${emailBtn}${emailSentLabel}</div></td>
+        </tr>`;
+    }).join('');
+  }
+
+  // Update status in Firestore
+  async function updateStatus(id, status) {
+    if (!isConfigured) {
+      // Update demo data locally
+      const reg = allRegistrations.find(r => r.id === id);
+      if (reg) reg.status = status;
+      updateStats(); renderTable();
+      showToast(`Marked as ${status} (demo mode)`, 'success');
+      return;
+    }
+    try {
+      await db.collection('registrations').doc(id).update({ status });
+      showToast(`Marked as ${status} ✓`, 'success');
+    } catch (err) {
+      showToast('Error: ' + err.message, 'error');
+    }
+  }
+
+  // Send confirmation email
+  async function sendEmail(id) {
+    const reg = allRegistrations.find(r => r.id === id);
+    if (!reg) return;
+
+    const btn = document.getElementById('ebtn-' + id);
+    if (btn) { btn.textContent = 'Sending…'; btn.disabled = true; }
+
+    if (!isConfigured) {
+      setTimeout(() => {
+        showToast(`Demo: email would be sent to ${reg.email}`, 'success');
+        if (btn) { btn.textContent = '✉ Send Email'; btn.disabled = false; }
+      }, 1200);
+      return;
+    }
+
+    try {
+      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+        to_email:  reg.email,
+        to_name:   reg.name,
+        from_name: 'Casa Costa Social Club',
+        reply_to:  'laramarlon996@gmail.com',
+      });
+      await db.collection('registrations').doc(id).update({ emailSent: true });
+      showToast(`✓ Email sent to ${reg.name}!`, 'success');
+    } catch (err) {
+      showToast('Email error: ' + err.message, 'error');
+      if (btn) { btn.textContent = '✉ Send Email'; btn.disabled = false; }
+    }
+  }
+
+  // Toast helper
+  let toastTimer;
+  function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast toast-${type} show`;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 4000);
+  }
+
+  // Escape HTML
+  function escHtml(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+</script>
+</body>
+</html>
