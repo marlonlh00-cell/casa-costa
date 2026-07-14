@@ -624,7 +624,7 @@ const EMAILJS_TEMPLATE_ID = "p5o3smc";
       await db.collection('registrations').doc(id).update({ emailSent: true });
       showToast(`✓ Email sent to ${reg.name}!`, 'success');
     } catch (err) {
-      showToast('Email error: ' + err.message, 'error');
+      showToast('Email error: ' + (err.text || err.message || JSON.stringify(err)), 'error');
       if (btn) { btn.textContent = '✉ Send Email'; btn.disabled = false; }
     }
   }
