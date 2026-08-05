@@ -12,13 +12,13 @@
 <script>
   // ⚙️ Paste your Firebase config here (same values as in admin.html)
   const firebaseConfig = {
-  apiKey: "AIzaSyDlQoPwhCtYZ3nkhNxrSBtmACC98Ethnw0",
-  authDomain: "casa-costa-4ea91.firebaseapp.com",
-  projectId: "casa-costa-4ea91",
-  storageBucket: "casa-costa-4ea91.firebasestorage.app",
-  messagingSenderId: "912567746381",
-  appId: "1:912567746381:web:1269dd0669434dc590c104"
-};
+    apiKey: "AIzaSyDlQoPwhCtYZ3nkhNxrSBtmACC98Ethnw0",
+    authDomain: "casa-costa-4ea91.firebaseapp.com",
+    projectId: "casa-costa-4ea91",
+    storageBucket: "casa-costa-4ea91.firebasestorage.app",
+    messagingSenderId: "912567746381",
+    appId: "1:912567746381:web:1269dd0669434dc590c104"
+  };
   let db = null;
   try {
     firebase.initializeApp(firebaseConfig);
@@ -335,6 +335,68 @@
     }
   }
 
+  /* ---------------- SEASON / EVENTS ---------------- */
+  .season-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:1.4rem;
+    max-width:900px;
+    margin:0 auto;
+  }
+  .season-card{
+    background:var(--sand);
+    border:1px solid rgba(11,63,82,0.18);
+    border-radius:4px;
+    padding:2.6rem 2rem;
+    text-align:center;
+    position:relative;
+    transition:transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .season-card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 30px 50px -30px rgba(11,63,82,0.4);
+  }
+  .season-num{
+    display:block;
+    font-family:var(--font-mono, var(--font-sans));
+    font-size:0.72rem;
+    letter-spacing:0.2em;
+    color:var(--coral);
+    margin-bottom:1rem;
+  }
+  .season-card h3{
+    font-family:var(--font-display);
+    font-size:clamp(1.5rem,3vw,2rem);
+    color:var(--navy);
+    margin-bottom:0.6rem;
+  }
+  .season-when{
+    font-family:var(--font-sans);
+    font-size:0.72rem;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--turquoise);
+    margin-bottom:1rem;
+  }
+  .season-desc{
+    font-size:0.92rem;
+    line-height:1.6;
+    color:rgba(11,63,82,0.7);
+    max-width:28ch;
+    margin:0 auto;
+  }
+  .season-note{
+    text-align:center;
+    font-size:0.88rem;
+    color:rgba(11,63,82,0.6);
+    margin-top:2.6rem;
+    font-style:italic;
+  }
+  @media (max-width:720px){
+    .season-grid{ grid-template-columns:1fr; }
+  }
+  .night-grid--second{ margin-top:0.9rem; }
+
   /* ---------------- MUSIC NOTE ---------------- */
   .music-note{
     text-align:center;
@@ -493,8 +555,8 @@
   <img class="nav-mark" src="logo-mark-white.png" alt="Casa Costa Social Club">
   <div class="nav-links">
     <a href="#about">About</a>
-    <a href="#launch">Launch Day</a>
-    <a href="#sunset">Sunset Party</a>
+    <a href="#events">Events</a>
+    <a href="#launch">The Launch</a>
     <a class="btn btn--ghost-light" href="#join">Register</a>
   </div>
 </nav>
@@ -540,35 +602,51 @@
   </div>
 </section>
 
-<section class="by-day" id="launch">
+<section class="by-day" id="events">
   <div class="wrap">
     <div class="section-head reveal">
-      <span class="eyebrow">Friday · July 24 · In the Venue</span>
-      <h2>Launch Day</h2>
-      <p>Casa Costa opens for the first time, strictly inside the house. Pool, cocktails, good company — the official start of it all.</p>
+      <span class="eyebrow">The Season</span>
+      <h2>Two Nights a Year</h2>
+      <p>Casa Costa doesn't happen often — and that's the point. Two gatherings a year, one on each coast of what we call home.</p>
     </div>
-    <div class="day-grid reveal">
-      <img class="g1" src="photo-pool-ladder.jpg" alt="Pool ladder beneath turquoise water">
-      <img class="g2" src="photo-ocean-bottle.jpg" alt="Person in the ocean celebrating with a bottle">
-      <img class="g3" src="photo-palm-beach.jpg" alt="Palm tree leaning over a white sand beach">
-      <img class="g4" src="photo-banana-real.jpg" alt="Banana leaves against the Caribbean sky in Puerto Cortés">
-      <img class="g5" src="photo-banana-close.jpg" alt="Banana leaves close up against blue sky">
+
+    <div class="season-grid reveal">
+      <div class="season-card">
+        <span class="season-num">01</span>
+        <h3>San Pedro Sula</h3>
+        <p class="season-when">Coming Soon</p>
+        <p class="season-desc">The city edition. Same crowd, same sound, new setting.</p>
+      </div>
+      <div class="season-card">
+        <span class="season-num">02</span>
+        <h3>Puerto Cortés</h3>
+        <p class="season-when">Coming Soon</p>
+        <p class="season-desc">Back to the coast. Pool by day, bonfire and DJ stage on the sand by night.</p>
+      </div>
     </div>
+
+    <p class="season-note reveal">Dates are announced to the list first — usually 48 hours before anyone else hears about it.</p>
   </div>
 </section>
 
-<section class="by-night" id="sunset">
+<section class="by-night" id="launch">
   <div class="wrap">
     <div class="section-head reveal">
-      <span class="eyebrow eyebrow--light">Saturday · July 25 · Beach Area</span>
-      <h2>Sunset Party</h2>
-      <p>Same house, but we move outside. A DJ stage on the beach and a giant bonfire to gather around and dance — all to watch the sunset together, with good music as the soundtrack.</p>
+      <span class="eyebrow eyebrow--light">Chapter One · July 2025</span>
+      <h2>The Launch</h2>
+      <p>Where it started — a house in Puerto Cortés, a DJ stage on the sand, and a bonfire that outlasted the sunset.</p>
     </div>
     <div class="night-grid reveal">
       <img class="n1" src="photo-sunset-crowd.jpg" alt="Crowd watching the sunset on the beach at Casa Costa">
       <img class="n2" src="photo-sunset-ocean.jpg" alt="The sun setting over the Caribbean Sea">
       <img class="n3" src="photo-bonfire-sunset.jpg" alt="Bonfire on the beach at sunset">
       <img class="n4" src="photo-bonfire.jpg" alt="People gathered around a bonfire on the beach at night">
+    </div>
+    <div class="night-grid night-grid--second reveal">
+      <img class="n1" src="photo-banana-backlit-sky.jpg" alt="Sunlit banana leaves against the Caribbean sky">
+      <img class="n2" src="photo-ocean-bottle.jpg" alt="Person in the ocean celebrating with a bottle">
+      <img class="n3" src="photo-palm-beach.jpg" alt="Palm tree leaning over a white sand beach">
+      <img class="n4" src="photo-banana-real.jpg" alt="Banana leaves against the Caribbean sky in Puerto Cortés">
     </div>
   </div>
 </section>
@@ -582,8 +660,8 @@
 
     <div class="section-head reveal">
       <span class="eyebrow">Registration</span>
-      <h2>Register for a Chance to Go</h2>
-      <p>Launch weekend — July 24 &amp; 25 — is open for registration now. Spots are limited, so registering doesn't guarantee a place; we'll follow up directly with confirmed guests.</p>
+      <h2>Get on the List</h2>
+      <p>Two events a year, and spots are limited. Register once and you're in the running for whatever comes next — we announce to the list first and follow up directly with confirmed guests.</p>
     </div>
 
     <div class="card reveal">
@@ -591,7 +669,7 @@
 
       <div class="form-main" id="formMain">
         <h3>Casa Costa</h3>
-        <p class="card-sub">Launch Weekend Registration</p>
+        <p class="card-sub">Guest List Registration</p>
 
         <form id="joinForm">
           <div class="field">
@@ -628,8 +706,8 @@
       <img class="footer-mark" src="logo-icon-white.png" alt="Casa Costa Social Club">
       <div class="footer-links">
         <a href="#about">About</a>
-        <a href="#launch">Launch Day</a>
-        <a href="#sunset">Sunset Party</a>
+        <a href="#events">Events</a>
+        <a href="#launch">The Launch</a>
         <a href="#join">Register</a>
       </div>
     </div>
@@ -704,7 +782,7 @@
     formMain.classList.add('is-hidden');
     successPanel.classList.add('is-active');
 
-    successVideo.src = 'assets/invite.mp4';
+    successVideo.src = 'invite.mp4';
     successVideo.load();
     successVideo.play().catch(() => {});
   });
